@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Livre{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-header bg-dark text-white rounded-top-4">
+            <h2 class="mb-0">
+                📚 Détails du Livre : <strong>{{ livre.titre }}</strong>
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center g-4">
+                <div class="col-md-4 text-center">
+                    <img src="{{ livre.image }}" alt="Image du livre" class="img-fluid rounded shadow-sm" style="max-height: 350px;">
+                </div>
+                <div class="col-md-8">
+                    <ul class="list-group list-group-flush fs-5">
+                        <li class="list-group-item"><strong>📌 ID :</strong> {{ livre.id }}</li>
+                        <li class="list-group-item"><strong>🏷️ Slug :</strong> {{ livre.slug }}</li>
+                        <li class="list-group-item"><strong>📖 Résumé :</strong> {{ livre.resume }}</li>
+                        <li class="list-group-item"><strong>🔢 ISBN :</strong> {{ livre.isbn }}</li>
+                        <li class="list-group-item"><strong>🏢 Éditeur :</strong> {{ livre.editeur }}</li>
+                        <li class="list-group-item"><strong>🗓️ Date d'Édition :</strong> {{ livre.dateEdition ? livre.dateEdition|date('d/m/Y') : 'Non spécifiée' }}</li>
+                        <li class="list-group-item"><strong>💶 Prix :</strong> {{ livre.prix }} €</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <a href="{{ path('app_livres_index') }}" class="btn btn-outline-secondary">
+                    ⬅️ Retour à la liste
+                </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_livres_edit', {'id': livre.id}) }}" class="btn btn-outline-primary">
+                        ✏️ Modifier
+                    </a>
+                    {{ include('livres/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

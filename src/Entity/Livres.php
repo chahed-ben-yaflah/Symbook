@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\LivresRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,6 +18,13 @@ class Livres
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre ne doit pas être vide.")]
+    #[Assert\Length(
+        min: 3,
+        max: 15,
+        minMessage: "Le titre doit contenir au moins {{ limit }} caractères.",
+        maxMessage: "Le titre ne doit pas dépasser {{ limit }} caractères."
+    )]
     private ?string $titre = null;
 
     #[ORM\Column(length: 255)]
@@ -36,7 +46,23 @@ class Livres
     private ?\DateTimeInterface $dateEdition = null;
 
     #[ORM\Column]
+    #[Assert\Positive(message: "Le prix doit être un nombre positif.")]
+    #[Assert\LessThanOrEqual(
+        value: 1000,
+        message: "Le prix ne doit pas dépasser {{ value }}."
+    )]
     private ?float $prix = null;
+
+    #[ORM\ManyToOne(inversedBy: 'livres')]
+    private ?Categorie $categorie = null;
+
+    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'livre')]
+    private Collection $ligneCommandes;
+
+    public function __construct()
+    {
+        $this->ligneCommandes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -135,6 +161,48 @@ class Livres
     public function setPrix(float $prix): static
     {
         $this->prix = $prix;
+
+        return $this;
+    }
+
+    public function getCategorie(): ?Categorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Categorie $categorie): static
+    {
+        $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LigneCommande>
+     */
+    public function getLigneCommandes(): Collection
+    {
+        return $this->ligneCommandes;
+    }
+
+    public function addLigneCommande(LigneCommande $ligneCommande): static
+    {
+        if (!$this->ligneCommandes->contains($ligneCommande)) {
+            $this->ligneCommandes->add($ligneCommande);
+            $ligneCommande->setLivre($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLigneCommande(LigneCommande $ligneCommande): static
+    {
+        if ($this->ligneCommandes->removeElement($ligneCommande)) {
+            // set the owning side to null (unless already changed)
+            if ($ligneCommande->getLivre() === $this) {
+                $ligneCommande->setLivre(null);
+            }
+        }
 
         return $this;
     }

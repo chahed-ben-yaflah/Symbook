@@ -15,6 +15,28 @@ class LivresRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Livres::class);
     }
+    public function searchByFilters(?string $titre = null, ?string $editeur = null, ?int $categorieId = null)
+{
+    $qb = $this->createQueryBuilder('l');
+    
+    if ($titre) {
+        $qb->andWhere('l.titre LIKE :titre')
+           ->setParameter('titre', '%'.$titre.'%');
+    }
+    
+    if ($editeur) {
+        $qb->andWhere('l.editeur LIKE :editeur')
+           ->setParameter('editeur', '%'.$editeur.'%');
+    }
+    
+    if ($categorieId) {
+        $qb->join('l.categorie', 'c')
+           ->andWhere('c.id = :categorieId')
+           ->setParameter('categorieId', $categorieId);
+    }
+    
+    return $qb->getQuery()->getResult();
+}
 
     //    /**
     //     * @return Livres[] Returns an array of Livres objects

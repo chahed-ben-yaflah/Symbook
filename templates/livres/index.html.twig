@@ -1,20 +1,161 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello LivresController!{% endblock %}
+{% block title %}Liste des Livres{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .book-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .book-table thead th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 500;
+            border: none;
+            padding: 15px 10px;
+        }
+        .book-table tbody tr {
+            transition: all 0.2s;
+        }
+        .book-table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .book-table tbody td {
+            vertical-align: middle;
+            padding: 12px 10px;
+            border-top: 1px solid #e9ecef;
+        }
+        .book-img {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .action-links a {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-right: 5px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .show-link {
+            background-color: #2ecc71;
+            color: white;
+            text-decoration: none;
+        }
+        .show-link:hover {
+            background-color: #27ae60;
+        }
+        .edit-link {
+            background-color: #f39c12;
+            color: white;
+            text-decoration: none;
+        }
+        .edit-link:hover {
+            background-color: #e67e22;
+        }
+        .create-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .create-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .no-records {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .price-cell {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .resume-cell {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="container py-4">
+    <h1 class="mb-4 text-center">Gestion des Livres</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <a href="{{ path('app_livres_new') }}" class="create-btn mb-4">
+        <i class="fas fa-plus-circle me-2"></i>Ajouter un nouveau livre
+    </a>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/xampp3/htdocs/Symfony2025/atelier4/Symbook/src/Controller/LivresController.php</code></li>
-        <li>Your template at <code>C:/xampp3/htdocs/Symfony2025/atelier4/Symbook/templates/livres/index.html.twig</code></li>
-    </ul>
+    <div class="table-responsive">
+        <table class="table book-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Titre</th>
+                    <th>Résumé</th>
+                    <th>ISBN</th>
+                    <th>Couverture</th>
+                    <th>Éditeur</th>
+                    <th>Date Edition</th>
+                    <th>Prix</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for livre in livres %}
+                <tr>
+                    <td>{{ livre.id }}</td>
+                    <td>{{ livre.titre }}</td>
+                    <td class="resume-cell" title="{{ livre.resume }}">{{ livre.resume }}</td>
+                    <td>{{ livre.isbn }}</td>
+                    <td>
+                        {% if livre.image %}
+                            <img src="{{ livre.image }}" class="book-img" alt="Couverture de {{ livre.titre }}">
+                        {% else %}
+                            <div class="book-img bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-book text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td>{{ livre.editeur }}</td>
+                    <td>{{ livre.dateEdition ? livre.dateEdition|date('d/m/Y') : '' }}</td>
+                    <td class="price-cell">{{ livre.prix }} DT</td>
+                    <td class="action-links">
+                        <a href="{{ path('app_livres_show', {'id': livre.id}) }}" class="show-link">
+                            <i class="fas fa-eye"></i> Voir
+                        </a>
+                        <a href="{{ path('app_livres_edit', {'id': livre.id}) }}" class="edit-link">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="9" class="no-records">Aucun livre trouvé</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

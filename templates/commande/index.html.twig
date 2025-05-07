@@ -1,0 +1,274 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Commandes{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4 py-5 animated-fadein">
+        <div class="dashboard-header glassmorphism">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-shopping-cart me-2"></i>Gestion des Commandes
+                    <span class="badge bg-primary-pulse ms-2">{{ commandes|length }}</span>
+                </h1>
+                <a href="{{ path('app_commande_new') }}" class="btn btn-primary btn-add floating">
+                    <i class="fas fa-plus me-2"></i>Nouvelle Commande
+                </a>
+            </div>
+
+            <div class="card filter-card morphing-card mb-4">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <a href="{{ path('app_commande_index') }}" class="btn btn-filter morphing-btn {% if app.request.attributes.get('_route') == 'app_commande_index' %}active{% endif %}">
+                            <i class="fas fa-list me-2"></i>Toutes
+                            <span class="filter-badge">{{ commandes|length }}</span>
+                        </a>
+                        <a href="{{ path('app_commande_by_statut', {'statut': 'en attente'}) }}" class="btn btn-filter btn-warning morphing-btn {% if app.request.query.get('statut') == 'en attente' %}active{% endif %}">
+                            <i class="fas fa-clock me-2"></i>En attente
+                            <span class="filter-badge">{{ commandes|filter(c => c.statut == 'en attente')|length }}</span>
+                        </a>
+                        <a href="{{ path('app_commande_by_statut', {'statut': 'validée'}) }}" class="btn btn-filter btn-success morphing-btn {% if app.request.query.get('statut') == 'validée' %}active{% endif %}">
+                            <i class="fas fa-check-circle me-2"></i>Validée
+                            <span class="filter-badge">{{ commandes|filter(c => c.statut == 'validée')|length }}</span>
+                        </a>
+                        <a href="{{ path('app_commande_by_statut', {'statut': 'annulée'}) }}" class="btn btn-filter btn-danger morphing-btn {% if app.request.query.get('statut') == 'annulée' %}active{% endif %}">
+                            <i class="fas fa-times-circle me-2"></i>Annulée
+                            <span class="filter-badge">{{ commandes|filter(c => c.statut == 'annulée')|length }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card table-card animated-slideup">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">ID</th>
+                                <th>Date</th>
+                                <th class="text-end">Montant</th>
+                                <th>Paiement</th>
+                                <th>Statut</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commande in commandes %}
+                                <tr class="animated-row {% if commande.statut == 'annulée' %}table-danger-light{% elseif commande.statut == 'validée' %}table-success-light{% elseif commande.statut == 'en attente' %}table-warning-light{% endif %}">
+                                    <td class="text-center fw-bold">#{{ commande.id }}</td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-medium">{{ commande.dateCommande ? commande.dateCommande|date('d/m/Y') : '' }}</span>
+                                            <small class="text-muted">{{ commande.dateCommande ? commande.dateCommande|date('H:i') : '' }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold">{{ commande.montantTotal|number_format(2, ',', ' ') }} DT</td>
+                                    <td>
+                                        <span class="badge payment-badge payment-{{ commande.modePaiement|lower|replace({' ': '-'}) }}">
+                                            <i class="payment-icon {{ commande.modePaiement == 'Carte' ? 'fas fa-credit-card' : (commande.modePaiement == 'PayPal' ? 'fab fa-paypal' : (commande.modePaiement == 'Virement' ? 'fas fa-exchange-alt' : 'fas fa-money-check')) }} me-1"></i>
+                                            {{ commande.modePaiement }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="{{ path('app_commande_update_statut', { id: commande.id }) }}" class="status-form">
+                                            <select name="statut" onchange="this.form.submit()" class="form-select status-select status-{{ commande.statut|replace({' ': '-'}) }} morphing-select">
+                                                <option value="en attente" {{ commande.statut == 'en attente' ? 'selected' : '' }}>
+                                                    En attente
+                                                </option>
+                                                <option value="validée" {{ commande.statut == 'validée' ? 'selected' : '' }}>
+                                                    Validée
+                                                </option>
+                                                <option value="annulée" {{ commande.statut == 'annulée' ? 'selected' : '' }}>
+                                                    Annulée
+                                                </option>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ path('app_commande_show', {'id': commande.id}) }}" class="btn btn-action btn-show">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_commande_edit', {'id': commande.id}) }}" class="btn btn-action btn-edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="empty-state animated-pulse">
+                                            <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+                                            <h5 class="text-muted">Aucune commande trouvée</h5>
+                                            <p class="text-muted">Créez une nouvelle commande pour commencer</p>
+                                            <a href="{{ path('app_commande_new') }}" class="btn btn-primary mt-3 floating">
+                                                <i class="fas fa-plus me-2"></i>Créer une commande
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f72585;
+            --glass-color: rgba(27, 115, 230, 0.15);
+            --glass-border: 1px solid rgba(27, 115, 230, 0.15);
+            
+            /* Nouvelles couleurs pour paiement */
+            --payment-carte: #4361ee;
+            --payment-paypal: #003087;
+            --payment-virement: #20c997;
+            --payment-cheque: #6f42c1;
+            --payment-especes: #28a745;
+            
+            /* Nouvelles couleurs pour boutons */
+            --btn-show: #17a2b8;
+            --btn-edit: #ffc107;
+        }
+        
+        /* ... vos autres styles existants ... */
+        
+        /* Styles pour les badges de paiement */
+        .payment-badge {
+            padding: 0.5em 0.9em;
+            font-weight: 600;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .payment-carte {
+            background-color: var(--payment-carte);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+        
+        .payment-paypal {
+            background-color: var(--payment-paypal);
+            box-shadow: 0 4px 12px rgba(0, 48, 135, 0.3);
+        }
+        
+        .payment-virement {
+            background-color: var(--payment-virement);
+            box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+            color: #000;
+        }
+        
+        .payment-cheque {
+            background-color: var(--payment-cheque);
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+        }
+        
+        .payment-especes {
+            background-color: var(--payment-especes);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        
+        .payment-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Styles pour les boutons d'action */
+        .btn-action {
+            border: none;
+            margin: 0 3px;
+            border-radius: 8px !important;
+            transition: all 0.3s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn-show {
+            background-color: var(--btn-show);
+        }
+        
+        .btn-edit {
+            background-color: var(--btn-edit);
+        }
+        
+        .btn-show:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(23, 162, 184, 0.3);
+        }
+        
+        .btn-edit:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+        }
+        
+        /* ... le reste de vos styles existants ... */
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Activer les tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Ajouter un délai d'animation pour chaque ligne
+            document.querySelectorAll('.animated-row').forEach((row, index) => {
+                row.style.setProperty('--row-index', index);
+            });
+            
+            // Effet de vague sur les boutons de filtre
+            const filterButtons = document.querySelectorAll('.morphing-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Délai pour laisser le temps à l'animation de se terminer
+                    setTimeout(() => {
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                    }, 150);
+                });
+            });
+            
+            // Animation lors du changement de statut
+            const statusForms = document.querySelectorAll('.status-form');
+            statusForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const select = this.querySelector('select');
+                    select.disabled = true;
+                    select.classList.add('submitting');
+                    
+                    // Simuler un délai pour l'animation
+                    setTimeout(() => {
+                        select.disabled = false;
+                        select.classList.remove('submitting');
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+{% endblock %}

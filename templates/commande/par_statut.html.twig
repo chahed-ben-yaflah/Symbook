@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commandes - {{ statut }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">Commandes</h1>
+            <p class="text-muted mb-0">Statut : 
+                <span class="badge bg-primary bg-opacity-75 text-white">{{ statut }}</span>
+            </p>
+        </div>
+        <a href="{{ path('app_commande_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Retour
+        </a>
+    </div>
+
+    <div class="card border-0 shadow rounded-3">
+        <div class="card-header bg-light border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-semibold mb-0">Liste des commandes</h5>
+                <span class="badge bg-dark bg-opacity-10 text-dark">{{ commandes|length }} commande(s)</span>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted">
+                        <tr>
+                            <th class="ps-4">Commande #</th>
+                            <th>Date</th>
+                            <th>Montant</th>
+                            <th>Paiement</th>
+                            <th>Statut</th>
+                           
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for commande in commandes %}
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">#{{ commande.id }}</td>
+                                <td>
+                                    <div>{{ commande.dateCommande|date('d/m/Y') }}</div>
+                                    <small class="text-muted">{{ commande.dateCommande|date('H:i') }}</small>
+                                </td>
+                                <td class="fw-semibold text-success">{{ commande.montantTotal }} DT</td>
+                                <td>
+                                    <span class="badge bg-{{ commande.modePaiement == 'Carte' ? 'success' : 'info' }} bg-opacity-25 text-dark">
+                                        <i class="bi bi-{{ commande.modePaiement == 'Carte' ? 'credit-card' : 'cash' }} me-1"></i>
+                                        {{ commande.modePaiement }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% set statut = commande.statut %}
+                                    {% set icon = statut == 'Livré' ? 'check-circle-fill text-success' : (statut == 'En cours' ? 'arrow-repeat text-warning' : 'clock-fill text-secondary') %}
+                                    <span class="badge bg-light text-dark d-inline-flex align-items-center">
+                                        <i class="bi bi-{{ icon }} me-1"></i>
+                                        {{ statut }}
+                                    </span>
+                                </td>
+                             
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-cart-x-fill text-muted" style="font-size: 2.5rem;"></i>
+                                    <h5 class="mt-3">Aucune commande trouvée</h5>
+                                    <p class="text-muted">Aucune commande avec le statut « {{ statut }} ».</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if commandes|length > 5 %}
+            <div class="card-footer bg-white border-top py-3">
+                <nav aria-label="Pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item disabled">
+                            <span class="page-link">Précédent</span>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Suivant</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: green;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-group .btn:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+        }
+
+        .card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.05);
+        }
+    </style>
+{% endblock %}
