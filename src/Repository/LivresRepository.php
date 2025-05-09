@@ -15,28 +15,28 @@ class LivresRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Livres::class);
     }
-    public function searchByFilters(?string $titre = null, ?string $editeur = null, ?int $categorieId = null)
-{
-    $qb = $this->createQueryBuilder('l');
-    
-    if ($titre) {
-        $qb->andWhere('l.titre LIKE :titre')
-           ->setParameter('titre', '%'.$titre.'%');
+    public function searchByCriteria(array $criteria)
+    {
+        $qb = $this->createQueryBuilder('l')
+            ->leftJoin('l.categorie', 'c');
+
+        if (!empty($criteria['titre'])) {
+            $qb->andWhere('l.titre LIKE :titre')
+               ->setParameter('titre', '%'.$criteria['titre'].'%');
+        }
+
+        if (!empty($criteria['editeur'])) {
+            $qb->andWhere('l.editeur LIKE :editeur')
+               ->setParameter('editeur', '%'.$criteria['editeur'].'%');
+        }
+
+        if (!empty($criteria['categorie'])) {
+            $qb->andWhere('c.libelle = :categorie')
+               ->setParameter('categorie', $criteria['categorie']);
+        }
+
+        return $qb->getQuery()->getResult();
     }
-    
-    if ($editeur) {
-        $qb->andWhere('l.editeur LIKE :editeur')
-           ->setParameter('editeur', '%'.$editeur.'%');
-    }
-    
-    if ($categorieId) {
-        $qb->join('l.categorie', 'c')
-           ->andWhere('c.id = :categorieId')
-           ->setParameter('categorieId', $categorieId);
-    }
-    
-    return $qb->getQuery()->getResult();
-}
 
     //    /**
     //     * @return Livres[] Returns an array of Livres objects

@@ -24,10 +24,12 @@ class LivresType extends AbstractType
                 'widget' => 'single_text',
             ])
             ->add('prix')
-            ->add('categorie', EntityType::class, [
+           ->add('categorie', EntityType::class, [
                 'class' => Categorie::class,
-                'choice_label' => 'id',
-            ])
+                'choice_label' => 'libelle', // Affiche le libellé dans les options
+                'choice_value' => 'libelle', // Utilise le libellé comme valeur soumise
+                'placeholder' => 'Choisir une catégorie',
+            ]);
         ;
     }
 

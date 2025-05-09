@@ -53,6 +53,26 @@
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-left: 4px solid #e74c3c;
         }
+        .search-card {
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border: none;
+        }
+        .search-btn {
+            background: #3498db;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .search-btn:hover {
+            background: #2980b9;
+        }
+        .reset-btn {
+            transition: all 0.3s ease;
+        }
+        .search-input {
+            border-radius: 20px;
+            padding: 10px 15px;
+        }
     </style>
 {% endblock %}
 
@@ -82,6 +102,55 @@
         </div>
     </div>
     <!-- Fin du proverbe -->
+
+    <!-- Formulaire de recherche -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="search-card card p-4 mb-4">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text" class="form-control search-input" id="titre" name="titre" 
+                                   value="{{ searchParams.titre|default('') }}" placeholder="Titre du livre">
+                            <label for="titre"><i class="fas fa-book me-2"></i>Titre du livre</label>
+                        </div>
+                    </div>
+                <div class="col-md-4">
+    <div class="form-floating">
+        <input type="text" class="form-control search-input" id="editeur" name="editeur" 
+               value="{{ searchParams.editeur|default('') }}" 
+               placeholder="Nom de l'éditeur"
+               aria-label="Recherche par éditeur">
+        <label for="editeur"><i class="fas fa-building me-2"></i>Nom de l'éditeur</label>
+    </div>
+</div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <select class="form-select search-input" id="categorie" name="categorie">
+                                <option value="">Toutes les catégories</option>
+                                {% for categorie in categories %}
+                                    <option value="{{ categorie.libelle }}" 
+                                        {{ (searchParams.categorie|default('') == categorie.libelle) ? 'selected' : '' }}>
+                                        {{ categorie.libelle }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <label for="categorie"><i class="fas fa-tag me-2"></i>Catégorie</label>
+                        </div>
+                    </div>
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn search-btn rounded-pill px-4 me-2">
+                            <i class="fas fa-search me-1"></i> Rechercher
+                        </button>
+                        <a href="{{ path('app_livres_acceuil') }}" class="btn reset-btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fas fa-undo me-1"></i> Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Fin du formulaire de recherche -->
 
     {% if livres|length > 0 %}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
@@ -120,15 +189,28 @@
                                 <i class="fas fa-pencil-alt me-1"></i> {{ livre.editeur }}
                                 <br>
                                 <i class="far fa-calendar-alt me-1"></i> {{ livre.dateEdition ? livre.dateEdition|date('d/m/Y') : 'Date inconnue' }}
+                                {% if livre.categorie %}
+                                <br>
+                                <i class="fas fa-tag me-1"></i> {{ livre.categorie.libelle }}
+                                {% endif %}
                             </small>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
+        
+        <!-- Pagination -->
+        <div class="navigation mt-5">
+            {{ knp_pagination_render(livres) }}
+        </div>
     {% else %}
         <div class="alert alert-info text-center">
-            Aucun livre disponible pour le moment.
+            {% if searchParams is defined and (searchParams.titre or searchParams.editeur or searchParams.categorie) %}
+                Aucun livre trouvé avec ces critères de recherche.
+            {% else %}
+                Aucun livre disponible pour le moment.
+            {% endif %}
         </div>
     {% endif %}
 </div>

@@ -23,7 +23,13 @@
                         <li class="list-group-item"><strong>🔢 ISBN :</strong> {{ livre.isbn }}</li>
                         <li class="list-group-item"><strong>🏢 Éditeur :</strong> {{ livre.editeur }}</li>
                         <li class="list-group-item"><strong>🗓️ Date d'Édition :</strong> {{ livre.dateEdition ? livre.dateEdition|date('d/m/Y') : 'Non spécifiée' }}</li>
-                        <li class="list-group-item"><strong>💶 Prix :</strong> {{ livre.prix }} €</li>
+                        <li class="list-group-item"><strong>💶 Prix :</strong> {{ livre.prix }} DT</li>
+                        {# Ajout du champ catégorie #}
+                        <li class="list-group-item">
+                            <strong>🏷️ Catégorie :</strong> 
+            {{ livre.categorie.libelle }}
+
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -1,4 +1,333 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
-{{ form_end(form) }}
+{% extends 'base.html.twig' %}
+
+{% block title %}{% if form.vars.value.id %}Modifier{% else %}Ajouter{% endif %} un Livre{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h2 class="h5 mb-0 text-primary">
+                        <i class="fas {% if form.vars.value.id %}fa-edit{% else %}fa-plus-circle{% endif %} me-2"></i>
+                        {% if form.vars.value.id %}Modifier{% else %}Ajouter{% endif %} un Livre
+                    </h2>
+                </div>
+                
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <!-- Titre -->
+                    <div class="mb-4">
+                        {{ form_label(form.titre, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                        {{ form_widget(form.titre, {
+                            'attr': {
+                                'class': 'form-control' ~ (form.titre.vars.errors|length ? ' is-invalid' : ''),
+                                'placeholder': 'Saisissez le titre du livre',
+                                'minlength': '3',
+                                'maxlength': '255',
+                                'pattern': '^[a-zA-Z0-9éèêëàâäôöûüçÉÈÊËÀÂÄÔÖÛÜÇ\s\-\'",;:!?().]+$',
+                                'required': 'required'
+                            }
+                        }) }}
+                        <div class="invalid-feedback">
+                            Le titre doit contenir entre 3 et 255 caractères et ne peut contenir que des lettres, chiffres et certains caractères spéciaux.
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <!-- Colonne gauche -->
+                        <div class="col-md-6">
+                            <!-- ISBN -->
+                            <div class="mb-4">
+                                {{ form_label(form.isbn, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.isbn, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form.isbn.vars.errors|length ? ' is-invalid' : ''),
+                                        'placeholder': 'Ex: 978-3-16-148410-0'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.isbn) }}
+                                </div>
+                            </div>
+                            
+                            <!-- Éditeur -->
+                            <div class="mb-4">
+                                {{ form_label(form.editeur, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.editeur, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form.editeur.vars.errors|length ? ' is-invalid' : ''),
+                                        'placeholder': 'Nom de l\'éditeur'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.editeur) }}
+                                </div>
+                            </div>
+                            
+                            <!-- Date d'édition (corrigé pour afficher une seule fois) -->
+                            <div class="mb-4">
+                                {{ form_label(form.dateEdition, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                             {{ form_widget(form.dateEdition, {
+    'attr': {
+        'class': 'form-control'
+    }
+}) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.dateEdition) }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne droite -->
+                        <div class="col-md-6">
+                            <!-- Catégorie -->
+                            <div class="mb-4">
+                                {{ form_label(form.categorie, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.categorie, {
+                                    'attr': {
+                                        'class': 'form-select' ~ (form.categorie.vars.errors|length ? ' is-invalid' : ''),
+                                        'data-libelle': true
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.categorie) }}
+                                </div>
+                            </div>
+                            
+                            <!-- Prix -->
+                            <div class="mb-4">
+                                {{ form_label(form.prix, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.prix, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form.prix.vars.errors|length ? ' is-invalid' : ''),
+                                            'placeholder': '0.00',
+                                            'inputmode': 'decimal',
+                                            'min': '0.01',
+                                            'max': '999.99',
+                                            'step': '0.01',
+                                            'required': 'required'
+                                        }
+                                    }) }}
+                                    <span class="input-group-text">DT</span>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Le prix doit être un nombre positif entre 0.01 et 999.99 DT
+                                </div>
+                            </div>
+                            
+                            <!-- Image -->
+                            <div class="mb-4">
+                                {{ form_label(form.image, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                                {{ form_widget(form.image, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form.image.vars.errors|length ? ' is-invalid' : ''),
+                                        'accept': 'image/*'
+                                    }
+                                }) }}
+                                {% if form.vars.value.image %}
+                                    <div class="mt-2">
+                                        <img src="{{ asset('uploads/' ~ form.vars.value.image) }}" 
+                                             alt="Couverture actuelle" 
+                                             class="img-thumbnail mt-1" 
+                                             style="max-height: 100px;">
+                                    </div>
+                                {% endif %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.image) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Slug -->
+                    <div class="mb-4">
+                        {{ form_label(form.slug, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                        {{ form_widget(form.slug, {
+                            'attr': {
+                                'class': 'form-control' ~ (form.slug.vars.errors|length ? ' is-invalid' : ''),
+                                
+                            }
+                        }) }}
+                        <small class="text-muted"></small>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.slug) }}
+                        </div>
+                    </div>
+                    
+                    <!-- Résumé -->
+                    <div class="mb-4">
+                        {{ form_label(form.resume, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                        {{ form_widget(form.resume, {
+                            'attr': {
+                                'class': 'form-control' ~ (form.resume.vars.errors|length ? ' is-invalid' : ''),
+                                'rows': 5,
+                                'style': 'min-height: 120px;'
+                            }
+                        }) }}
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.resume) }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <a href="{{ path('app_livres_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i> {% if form.vars.value.id %}Mettre à jour{% else %}Ajouter{% endif %}
+                        </button>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .card {
+        border-radius: 0.5rem;
+    }
+    .form-label {
+        margin-bottom: 0.5rem;
+    }
+    .form-control, .form-select {
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        padding: 0.5rem 1.5rem;
+    }
+    .btn-outline-secondary {
+        padding: 0.5rem 1.5rem;
+    }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    .invalid-feedback {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    .is-valid {
+        border-color: #198754;
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+
+<script>
+
+        // Génération automatique du slug si vide
+        const titreInput = document.querySelector('#{{ form.titre.vars.id }}');
+        const slugInput = document.querySelector('#{{ form.slug.vars.id }}');
+        
+        if (titreInput && slugInput) {
+            titreInput.addEventListener('blur', function() {
+                if (!slugInput.value) {
+                    const slug = this.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9éèêëàâäôöûüç\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-');
+                    slugInput.value = slug;
+                }
+            });
+        }
+        
+        // Validation personnalisée pour le prix
+        const prixInput = document.querySelector('#{{ form.prix.vars.id }}');
+        if (prixInput) {
+            prixInput.addEventListener('input', function() {
+                // Remplace les virgules par des points
+                this.value = this.value.replace(/,/g, '.');
+                
+                // Validation du format et de la plage
+                const value = parseFloat(this.value);
+                const isValid = !isNaN(value) && 
+                              value > 0 && 
+                              value <= 1000 && 
+                              /^\d+(\.\d{1,2})?$/.test(this.value);
+                
+                if (this.value && !isValid) {
+                    this.setCustomValidity('Le prix doit être entre 0.01 et 999.99 DT avec maximum 2 décimales');
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else {
+                    this.setCustomValidity('');
+                    this.classList.remove('is-invalid');
+                    if (this.value) this.classList.add('is-valid');
+                }
+            });
+        }
+        
+        // Validation personnalisée pour le titre
+        if (titreInput) {
+            titreInput.addEventListener('input', function() {
+                // Vérification de la longueur
+                const isLengthValid = this.value.length >= 3 && this.value.length <= 255;
+                
+                // Vérification des caractères autorisés
+                const isPatternValid = /^[a-zA-Z0-9éèêëàâäôöûüçÉÈÊËÀÂÄÔÖÛÜÇ\s\-\'",;:!?().]+$/.test(this.value);
+                
+                if (!isLengthValid) {
+                    this.setCustomValidity('Le titre doit contenir entre 3 et 255 caractères');
+                } else if (!isPatternValid) {
+                    this.setCustomValidity('Caractères spéciaux non autorisés');
+                } else {
+                    this.setCustomValidity('');
+                }
+                
+                // Mise à jour visuelle
+                if (this.value.length > 0) {
+                    if (!isLengthValid || !isPatternValid) {
+                        this.classList.add('is-invalid');
+                        this.classList.remove('is-valid');
+                    } else {
+                        this.classList.add('is-valid');
+                        this.classList.remove('is-invalid');
+                    }
+                } else {
+                    this.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+            
+            // Validation initiale si le champ est pré-rempli
+            if (titreInput.value) {
+                titreInput.dispatchEvent(new Event('input'));
+            }
+        }
+        
+        // Validation du formulaire
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+{% endblock %}
